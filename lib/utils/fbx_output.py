@@ -29,7 +29,7 @@ import os
 import sys
 import bpy
 import time
-import joblib
+#import joblib
 import argparse
 import numpy as np
 import addon_utils
@@ -182,11 +182,11 @@ def process_poses(
     if fps_target > fps_source:
         fps_target = fps_source
 
-    print(f'Gender: {gender}')
-    print(f'Number of source poses: {str(poses.shape[0])}')
-    print(f'Source frames-per-second: {str(fps_source)}')
-    print(f'Target frames-per-second: {str(fps_target)}')
-    print('--------------------------------------------------')
+    #print(f'Gender: {gender}')
+    #print(f'Number of source poses: {str(poses.shape[0])}')
+    #print(f'Source frames-per-second: {str(fps_source)}')
+    #print(f'Target frames-per-second: {str(fps_target)}')
+    #print('--------------------------------------------------')
 
     setup_scene(model_path, fps_target)
 
@@ -253,15 +253,15 @@ if __name__ == '__main__':
         if bpy.app.background:
 
             parser = argparse.ArgumentParser(description='Create keyframed animated skinned SMPL mesh from VIBE output')
-            parser.add_argument('--input', dest='input_path', type=str, required=True,
+            parser.add_argument('--input', dest='input_path', type=str, default="../../output/vibe_output.pkl",
                                 help='Input file or directory')
-            parser.add_argument('--output', dest='output_path', type=str, required=True,
+            parser.add_argument('--output', dest='output_path', type=str, default="../../output/fbx_output.fbx",
                                 help='Output file or directory')
             parser.add_argument('--fps_source', type=int, default=fps_source,
                                 help='Source framerate')
             parser.add_argument('--fps_target', type=int, default=fps_target,
                                 help='Target framerate')
-            parser.add_argument('--gender', type=str, default=gender,
+            parser.add_argument('--gender', type=str, default="female",
                                 help='Always use specified gender')
             parser.add_argument('--start_origin', type=int, default=start_origin,
                                 help='Start animation centered above origin')
@@ -320,14 +320,15 @@ if __name__ == '__main__':
                 person_id=args.person_id
             )
             export_animated_mesh(output_path)
-
+        '''
         print('--------------------------------------------------')
         print('Animation export finished.')
         print(f'Poses processed: {str(poses_processed)}')
         print(f'Processing time : {time.perf_counter() - startTime:.2f} s')
         print('--------------------------------------------------')
+        '''
         sys.exit(0)
-
+        
     except SystemExit as ex:
         if ex.code is None:
             exit_status = 0
