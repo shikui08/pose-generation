@@ -190,7 +190,7 @@ def video_to_images(vid_file, img_folder=None, return_info=False):
                '-i', vid_file,
                '-f', 'image2',
                '-v', 'error',
-               '-r', '20', #TODO: parameterize
+               '-r', '25',
                f'{img_folder}/%06d.png']
     print(f'Running \"{" ".join(command)}\"')
     subprocess.call(command)
@@ -234,7 +234,6 @@ def images_to_video(img_folder, output_vid_file):
     command = [
         'ffmpeg', '-y', '-threads', '16', '-i', f'{img_folder}/%06d.png', '-profile:v', 'baseline',
         '-level', '3.0', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-an', '-v', 'error', output_vid_file,
-        '-r', '20', #TODO: parameterize
     ]
 
     print(f'Running \"{" ".join(command)}\"')
