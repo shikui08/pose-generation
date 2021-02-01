@@ -2,7 +2,7 @@ import bpy
 import csv
 
 fp = "../../../..//Users/bronwynbiro/Documents/school/cmpt/415/v1_translation.csv"
-#collection = bpy.data.collections['person']
+collection = bpy.data.collections['person']
 
 with open(fp) as f:
     rdr = csv.reader(f)
@@ -11,11 +11,10 @@ with open(fp) as f:
     
     people = []
     
-    for collection in bpy.data.collections:
-       for i, obj in enumerate(collection.all_objects):
-           name = obj.name
-           if name[0] == "o":
-               people.append(obj)
+    for i, obj in enumerate(collection.all_objects):
+       name = obj.name
+       if name[0] == "o":
+           people.append(obj)
     
     
     boundary = n // len(people)
@@ -26,11 +25,10 @@ with open(fp) as f:
     for i, obj in enumerate(people):
         start = i * boundary
         for j in range(start, start + boundary, boundary // 3):
-            print(j)
             time, x, y, z = file_lst[j]
             obj.location.x = float(x)
             obj.location.y = float(y)
-            obj.location.z = 1.7581431008140374
+            obj.location.z = 0
             #obj.location.z = float(z)
             #print(obj.location)
         
