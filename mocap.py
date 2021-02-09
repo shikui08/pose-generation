@@ -17,8 +17,8 @@ def get_timestamps():
             time_to_frame[time] = i
     return time_to_frame
   
-def set_position(people, times):
-    #time_to_data = defaultdict(list)
+def get_position(people, times):
+    frame_to_data = defaultdict(list)
     set_frames = set()
     with open(translation) as t:
         with open(orientation) as o:
@@ -31,45 +31,75 @@ def set_position(people, times):
                 if time in times:
                     frame = times[time]
                     if frame in people and frame not in set_frames:
-                        print(frame)
                         obj = people[frame][0]
                         
-                        #obj.hide_set(False)
-                        #obj.hide_viewport = False
-                        #obj.hide_render = False
-                        # Show and set object
-                        obj.hide_render = False
-                        #obj.keyframe_insert(data_path="hide_render", frame=frame)
-                        obj.location = (x, float(y) * -1, 0) 
-                        obj.rotation_euler =  Euler((roll + 1.75814, pitch, 0), 'XYZ')
-                        bpy.context.scene.frame_set(frame)
+                        location = (x, float(y) * -1, 0)
+                        rotation_euler =  Euler((roll + 1.75814, pitch, 0), 'XYZ')
+                        frame_to_data[frame] = [location, rotation_euler]
                         
-                        o#bj.hide_set(True)
-                        #obj.hide_viewport = True
-                        obj.hide_render = True
-                        #obj.keyframe_insert(data_path="hide_render", frame=frame+1)
-                        #bpy.context.scene.frame_set(frame+1)
                         set_frames.add(frame)
-                        
+    return frame_to_data
+                
+def set_position(frame_to_data, people):
+    prev_obj = None
+    for frame, data in frame_to_data.items():
+        obj = people[frame][0]
         
+        # Hide previous object
+        if prev_obj:
+            prev_obj.location = (10, 10, 0)
+            #prev_obj.hide_viewport = True
+            #obj.hide_set(True)
+            bpy.context.scene.frame_set(frame-1)
+            
+        # Set frame location and visibility
+        obj.hide_set(False)
+        obj.hide_viewport = False
+        
+        obj.location = data[0]
+        obj.rotation_euler =  data[-1]
+        bpy.context.scene.frame_set(frame)
+        
+        prev_obj = obj
+        
+        print("setting obj:", obj.name, frame)
+        
+        #obj.keyframe_insert(data_path="hide_render", frame=frame)
+        #obj.keyframe_insert(data_path="location", frame=frame)
+                        
+                        
+        # Hide object again
+        #obj.hide_set(True)
+        #obj.hide_render = True
+        
+        #obj.keyframe_insert(data_path="hide_render", frame=frame+1)
+        #bpy.context.scene.frame_set(frame+1)
+       
+              
 def get_meshes():
     # Get all the people meshes
     people = defaultdict(list)
     for obj in collection.all_objects:
         name = obj.name
+        obj.location = (10, 10, 0)
         if name[0] == "o" and "empty" not in name: 
-            frame = obj.name.split("o_")[-1]
+            name = name.split("o_")
+            frame = name[-1]
             if frame.isdigit():
-               people[int(frame)] = [obj]
+                frame = int(frame)
+                people[frame] = [obj]
+                #bpy.context.scene.frame_set(frame)
         
     return people
   
+
+        
 def main():
     times = get_timestamps()  
-    #print(times)    
     people = get_meshes()
-    #print(people)
-    set_position(people, times)
+    print(len(people))
+    positions = get_position(people, times)
+    print(len(positions))
+    set_position(positions, people)
 
 main()
-
