@@ -42,38 +42,33 @@ def get_position(people, times):
                 
 def set_position(frame_to_data, people):
     prev_obj = None
-    for frame, data in frame_to_data.items():
+    end_frame = max(frame_to_data.keys())
+
+    for frame, data in sorted(frame_to_data.items()):
         obj = people[frame][0]
         
         # Hide previous object
         if prev_obj:
-            prev_obj.location = (10, 10, 0)
-            #prev_obj.hide_viewport = True
-            #obj.hide_set(True)
-            bpy.context.scene.frame_set(frame-1)
+            last_frame = int(prev_obj.name.split("o_")[-1])
+            print("Hiding {} at frame {}".format(str(prev_obj), last_frame))
+            #prev_obj.location = (10, 10, 0)
+            prev_obj.hide_viewport = True
+            prev_obj.keyframe_insert(data_path="hide_viewport", frame=last_frame)
             
         # Set frame location and visibility
-        obj.hide_set(False)
+        #obj.hide_set(False)
         obj.hide_viewport = False
         
         obj.location = data[0]
         obj.rotation_euler =  data[-1]
-        bpy.context.scene.frame_set(frame)
         
         prev_obj = obj
         
-        print("setting obj:", obj.name, frame)
+        obj.keyframe_insert(data_path="hide_viewport", frame=frame-1)
+        obj.keyframe_insert(data_path="location", frame=frame-1)
         
-        #obj.keyframe_insert(data_path="hide_render", frame=frame)
-        #obj.keyframe_insert(data_path="location", frame=frame)
-                        
-                        
-        # Hide object again
-        #obj.hide_set(True)
-        #obj.hide_render = True
         
-        #obj.keyframe_insert(data_path="hide_render", frame=frame+1)
-        #bpy.context.scene.frame_set(frame+1)
+        print("Showing {} at frame {}".format(obj.name, frame-1))
        
               
 def get_meshes():
@@ -81,14 +76,16 @@ def get_meshes():
     people = defaultdict(list)
     for obj in collection.all_objects:
         name = obj.name
-        obj.location = (10, 10, 0)
+        
+        # Initalize all  to out of frame
+        #obj.location = (10, 10, 0)
         if name[0] == "o" and "empty" not in name: 
             name = name.split("o_")
             frame = name[-1]
             if frame.isdigit():
                 frame = int(frame)
                 people[frame] = [obj]
-                #bpy.context.scene.frame_set(frame)
+                #obj.keyframe_insert(data_path="location", frame=frame)
         
     return people
   
