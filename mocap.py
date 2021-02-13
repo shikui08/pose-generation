@@ -13,21 +13,23 @@ def get_timestamps():
     with open(timestamps) as f:
         for i, line in enumerate(f):
             _, time = line.split(",")
-            time = round(float(time), 2)
+            time = round(float(time), 1)
             time_to_frame[time] = i
     return time_to_frame
   
 def get_position(people, times):
     frame_to_data = defaultdict(list)
     set_frames = set()
+    match = 0
     with open(translation) as t:
         with open(orientation) as o:
             for trans_line, o_line in zip(t, o):
-                time, x, y, z = [float(x) for x in trans_line.split(",")]
+                time_t, x, y, z = [float(x) for x in trans_line.split(",")]
                 time_o, roll, pitch, yaw = [float(x) for x in o_line.split(",")]
                 
-                time = round(float(time), 2)
-                
+                time_t = round(float(time_t), 1) #float(time)
+
+                time = time_t
                 if time in times:
                     frame = times[time]
                     if frame in people and frame not in set_frames:
@@ -38,39 +40,50 @@ def get_position(people, times):
                         frame_to_data[frame] = [location, rotation_euler]
                         
                         set_frames.add(frame)
+                        
     return frame_to_data
                 
 def set_position(frame_to_data, people):
     prev_obj = None
-    end_frame = max(frame_to_data.keys())
-
-    for frame, data in sorted(frame_to_data.items()):
+    end = max(frame_to_data.keys())
+    print(end)
+    
+    # Initialize all to hidden
+    for frame, data in frame_to_data.items():
         obj = people[frame][0]
-        
-        # Hide previous object
-        if prev_obj:
-            last_frame = int(prev_obj.name.split("o_")[-1])
-            print("Hiding {} at frame {}".format(str(prev_obj), last_frame))
-            #prev_obj.location = (10, 10, 0)
-            prev_obj.hide_viewport = True
-            prev_obj.keyframe_insert(data_path="hide_viewport", frame=last_frame)
+        obj.hide_viewport = True
+        #obj.keyframe_insert(data_path="hide_viewport", frame=1)
+
+    
+    for frame in range(end+1):
+        if frame in frame_to_data:
+            # Place mesh for each frame
+            obj = people[frame][0]
+            data = frame_to_data[frame]
             
-        # Set frame location and visibility
-        #obj.hide_set(False)
-        obj.hide_viewport = False
-        
-        obj.location = data[0]
-        obj.rotation_euler =  data[-1]
-        
-        prev_obj = obj
-        
-        obj.keyframe_insert(data_path="hide_viewport", frame=frame-1)
-        obj.keyframe_insert(data_path="location", frame=frame-1)
-        
-        
-        print("Showing {} at frame {}".format(obj.name, frame-1))
+            # Hide previous object
+            if prev_obj:
+                last_frame = int(prev_obj.name.split("o_")[-1])
+                #print("Hiding {} at frame {}".format(str(prev_obj), last_frame+1))
+                prev_obj.hide_viewport = True
+                #bpy.context.scene.frame_set(frame-1)
+                #prev_obj.keyframe_insert(data_path="hide_viewport", frame=last_frame+1)
+                bpy.context.scene.frame_set(last_frame+1)
+                
+            # Set frame location and visibility
+            obj.hide_viewport = False
+            obj.location = data[0]
+            obj.rotation_euler =  data[-1]
+            
+            #obj.keyframe_insert(data_path="hide_viewport", frame=frame)
+            #obj.keyframe_insert(data_path="location", frame=frame)
+            
+            prev_obj = obj
+            
+        bpy.context.scene.frame_set(frame)
+        #print("Showing {} at frame {}".format(obj.name, frame))
        
-              
+
 def get_meshes():
     # Get all the people meshes
     people = defaultdict(list)
@@ -78,25 +91,28 @@ def get_meshes():
         name = obj.name
         
         # Initalize all  to out of frame
-        #obj.location = (10, 10, 0)
         if name[0] == "o" and "empty" not in name: 
             name = name.split("o_")
             frame = name[-1]
             if frame.isdigit():
                 frame = int(frame)
                 people[frame] = [obj]
-                #obj.keyframe_insert(data_path="location", frame=frame)
         
     return people
-  
 
         
 def main():
+    '''
+    for a in bpy.data.actions: 
+        a.user_clear()  
+    '''
     times = get_timestamps()  
     people = get_meshes()
-    print(len(people))
+    
     positions = get_position(people, times)
-    print(len(positions))
+    
+    print("Number of meshes:", len(people), len(positions))
+    
     set_position(positions, people)
 
 main()
