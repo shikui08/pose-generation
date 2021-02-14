@@ -106,6 +106,8 @@ def get_meshes():
 
         
 def main():
+    for obj in collection:
+        obj.animation_data_clear()
 
     times = get_timestamps()  
     people = get_meshes()
