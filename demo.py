@@ -95,9 +95,11 @@ def main(args):
         tracking_results = mot(image_folder)
 
     # remove tracklets if num_frames is less than MIN_NUM_FRAMES
+    '''
     for person_id in list(tracking_results.keys()):
         if tracking_results[person_id]['frames'].shape[0] < MIN_NUM_FRAMES:
             del tracking_results[person_id]
+    '''
 
     # ========= Define VIBE model ========= #
     model = VIBE_Demo(
