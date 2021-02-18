@@ -53,7 +53,7 @@ If you don't have a suitable device, try running our Colab demo.
 
 Clone the repo:
 ```bash
-git clone https://github.com/mkocabas/VIBE.git
+git clone https://github.com/shikui08/pose-generation.git
 ```
 
 Install the requirements using `virtualenv` or `conda`:
@@ -77,6 +77,11 @@ source scripts/prepare_data.sh
 Then, running the demo is as simple as:
 
 ```bash
+
+
+python demo.py --vid_file sample_video.mp4 --output_folder output/ --no_render
+
+
 # Run on a local video
 python demo.py --vid_file sample_video.mp4 --output_folder output/ --display
 
